@@ -1,3 +1,5 @@
+#torch = 2.2.2
+#torchvision = 0.17.2
 import cv2 as cv
 import os
 from sqlmodel import Session, select

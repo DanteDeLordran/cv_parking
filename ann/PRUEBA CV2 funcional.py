@@ -7,6 +7,7 @@ from PIL import Image
 import pathlib
 import easyocr
 import time
+from colorama import Fore
 
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
@@ -16,7 +17,7 @@ pathlib.PosixPath = pathlib.WindowsPath
 sys.path.append(os.path.abspath('yolov5'))
 
 # Cargar el modelo YOLOv5 personalizado
-model = torch.hub.load('ultralytics/yolov5', 'custom', path='./modelo_placas.pt')
+model = torch.hub.load('ultralytics/yolov5', 'custom', path='ann/modelo_placas.pt')
 
 # Cargar el detector de texto EasyOCR
 reader = easyocr.Reader(['en'])  # Especifica los idiomas que quieres soportar
@@ -72,9 +73,7 @@ while cap.isOpened():
                 # Formato de la cadena de resultado
                 current_time = time.strftime("%Y%m%d_%H%M%S")
                 result_string = f"RASPBERRY_{raspberry_name}CAM-{camera_number}_PLATES{license_number}_{current_time}"
-
-                # Mostrar y/o imprimir el resultado formateado
-                print(result_string)
+                print( Fore.RED + result_string)
 
                 # Actualizar el último número de placa detectado
                 last_license_number = license_number

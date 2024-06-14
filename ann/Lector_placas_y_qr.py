@@ -10,6 +10,7 @@ import time
 import threading
 import datetime as dt
 from colorama import Fore
+from pyzbar.pyzbar import decode
 
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
@@ -30,8 +31,11 @@ camera_number = 1
 # Restaurar PosixPath
 pathlib.PosixPath = temp
 
-# Configurar la cámara
-cap = cv2.VideoCapture(0)
+# Configurar la cámara principal
+cap = cv2.VideoCapture(1)
+
+# Configurar la segunda cámara para QR
+cap_qr = cv2.VideoCapture(0)  # Suponiendo que la segunda cámara está en el índice 0
 
 # Verificar si se está utilizando la GPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -44,10 +48,6 @@ model.to(device)
 prev_license_number = None
 prev_print_time = 0  # Tiempo de impresión del texto de la placa anterior
 program_running = True
-
-read_qr_code()
-main_camera()
-
 
 # Función para procesar fotogramas y realizar la inferencia
 def process_frames():
@@ -103,13 +103,63 @@ def process_frames():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             program_running = False
 
-# Iniciar el procesamiento de fotogramas en un hilo separado
+# Función para leer códigos QR
+def read_qr_code(frame, last_data):
+    # Decode QR codes in the frame
+    qr_codes = decode(frame)
+    current_data = None
+
+    for qr in qr_codes:
+        qr_data = qr.data.decode('utf-8')
+        qr_type = qr.type
+        current_data = qr_data
+
+        # Draw a rectangle around the QR code
+        points = qr.polygon
+        if len(points) == 4:
+            pts = np.array([[point.x, point.y] for point in points], dtype=np.int32)
+            pts = pts.reshape((-1, 1, 2))
+            cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
+        else:
+            rect = qr.rect
+            cv2.rectangle(frame, (rect.left, rect.top), (rect.left + rect.width, rect.top + rect.height), (0, 255, 0), 2)
+
+        # Display the QR code data
+        x, y, w, h = qr.rect
+        cv2.putText(frame, qr_data, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+        if qr_data != last_data:
+            print(f'Detected QR code: {qr_data} (Type: {qr_type})')
+
+    return frame, current_data
+
+# Función para procesar fotogramas y leer códigos QR
+def process_qr_frames():
+    last_data = None
+    while program_running:
+        ret, frame = cap_qr.read()
+        if not ret:
+            print("Error al capturar el fotograma de la cámara QR.")
+            break
+
+        frame, last_data = read_qr_code(frame, last_data)
+        cv2.imshow('QR Code Scanner', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+# Iniciar el procesamiento de fotogramas en hilos separados
 frame_thread = threading.Thread(target=process_frames)
+qr_thread = threading.Thread(target=process_qr_frames)
+
 frame_thread.start()
+qr_thread.start()
 
-# Esperar a que el hilo de procesamiento termine
+# Esperar a que los hilos de procesamiento terminen
 frame_thread.join()
+qr_thread.join()
 
-# Liberar recursos de la cámara al terminar
+# Liberar recursos de las cámaras al terminar
 cap.release()
+cap_qr.release()
 cv2.destroyAllWindows()

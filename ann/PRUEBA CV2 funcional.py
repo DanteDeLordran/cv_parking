@@ -7,8 +7,9 @@ from PIL import Image
 import pathlib
 import easyocr
 import time
-from colorama import Fore
 import threading
+import datetime as dt
+from colorama import Fore
 
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
@@ -30,7 +31,7 @@ camera_number = 1
 pathlib.PosixPath = temp
 
 # Configurar la cámara
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Verificar si se está utilizando la GPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -76,18 +77,17 @@ def process_frames():
                 else:
                     license_number = "UNKNOWN"
 
-            # Comparar con el último número de placa detectado
-            if license_number != last_license_number:
-                # Formato de la cadena de resultado
-                current_time = time.strftime("%Y%m%d_%H%M%S")
-                result_string = f"RASPBERRY_{raspberry_name}CAM-{camera_number}_PLATES{license_number}_{current_time}"
-
-                # Mostrar y/o imprimir el resultado formateado
-                print(result_string)
+                # Verificar si el texto de la placa ha cambiado desde la última vez
+                current_time = time.time()
+                if (license_number != prev_license_number or current_time - prev_print_time > 5):  # Imprimir solo si ha pasado más de 5 segundos
+                    # Mostrar y/o imprimir el resultado formateado
+                    now = dt.datetime.now()
+                    result_string = f"--RASPBERRY: {Fore.BLUE}{raspberry_name} --CAM: {Fore.CYAN}{camera_number} --PLATE: {Fore.GREEN}{license_number} --DATE: {Fore.MAGENTA}{now:%c}"
+                    print(result_string)
 
                     # Actualizar el texto de la placa anterior y el tiempo de impresión
-                prev_license_number = license_number
-                prev_print_time = current_time
+                    prev_license_number = license_number
+                    prev_print_time = current_time
 
                 # Dibujar el cuadro delimitador y el texto sobre el fotograma
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)

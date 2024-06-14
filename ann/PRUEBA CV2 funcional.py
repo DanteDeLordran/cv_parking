@@ -8,7 +8,9 @@ import pathlib
 import easyocr
 import time
 import threading
-from .qr_reader import *
+import datetime as dt
+from colorama import Fore
+
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
@@ -29,7 +31,7 @@ camera_number = 1
 pathlib.PosixPath = temp
 
 # Configurar la cámara
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Verificar si se está utilizando la GPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -83,7 +85,8 @@ def process_frames():
                 current_time = time.time()
                 if (license_number != prev_license_number or current_time - prev_print_time > 5):  # Imprimir solo si ha pasado más de 5 segundos
                     # Mostrar y/o imprimir el resultado formateado
-                    result_string = f"RASPBERRY_{raspberry_name}CAM-{camera_number}_PLATES{license_number}_{time.strftime('%Y%m%d_%H%M%S')}"
+                    now = dt.datetime.now()
+                    result_string = f"--RASPBERRY: {Fore.BLUE}{raspberry_name} --CAM: {Fore.CYAN}{camera_number} --PLATE: {Fore.GREEN}{license_number} --DATE: {Fore.MAGENTA}{now:%c}"
                     print(result_string)
 
                     # Actualizar el texto de la placa anterior y el tiempo de impresión

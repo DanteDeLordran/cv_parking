@@ -11,3 +11,4 @@ torchvision == 0.17.2
 ultralytics>=8.0.232
 setuptools>=65.5.1 
 easyocr
+pyzbar

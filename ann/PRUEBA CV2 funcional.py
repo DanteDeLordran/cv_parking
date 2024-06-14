@@ -8,7 +8,7 @@ import pathlib
 import easyocr
 import time
 import threading
-
+from .qr_reader import *
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
@@ -42,6 +42,10 @@ model.to(device)
 prev_license_number = None
 prev_print_time = 0  # Tiempo de impresión del texto de la placa anterior
 program_running = True
+
+read_qr_code()
+main_camera()
+
 
 # Función para procesar fotogramas y realizar la inferencia
 def process_frames():

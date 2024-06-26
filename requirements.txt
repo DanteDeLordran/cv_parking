@@ -10,5 +10,6 @@ torch == 2.2.2
 torchvision == 0.17.2
 ultralytics>=8.0.232
 setuptools>=65.5.1 
-easyocr
-pyzbar
+easyocr~=1.7.1
+pyzbar~=0.1.9
+colorama~=0.4.6

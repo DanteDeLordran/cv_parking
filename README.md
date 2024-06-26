@@ -1,4 +1,4 @@
-# RegistrationRegistry
+# CVParking
 A computational vision NN project for detecting and giving access to cars based on their car registration
 
 ## Stack used

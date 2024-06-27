@@ -10,6 +10,16 @@ This might take some minutes since some dependencies are very heavy sized
 ```
 pip install --no-cache-dir -r requirements.txt
 ```
+2. Add env variables
+```
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+DB_NAME=
+PG_EMAIL=
+PG_PASSWORD=
+```
 
 ## Start DB
 

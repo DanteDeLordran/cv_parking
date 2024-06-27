@@ -11,7 +11,7 @@ import torch
 from PIL import Image
 from colorama import Fore
 from pyzbar.pyzbar import decode
-from ..app.main import get_all_employees_car_registry, get_employee_by_car_registry
+from app.services.services import is_registry_registered
 
 # Temporarily override PosixPath for compatibility on Windows
 temp = pathlib.PosixPath
@@ -53,8 +53,6 @@ program_running = True
 def process_frames():
     global prev_license_number, prev_print_time, program_running
 
-    get_all_employees_car_registry()
-
     while program_running:
         ret, frame = cap.read()
         if not ret:
@@ -90,7 +88,7 @@ def process_frames():
                     result_string = f"--RASPBERRY: {Fore.BLUE}{raspberry_name} --CAM: {Fore.CYAN}{camera_number} --PLATE: {Fore.GREEN}{license_number} --DATE: {Fore.MAGENTA}{now:%c}"
                     print(result_string)
 
-                    if get_employee_by_car_registry(license_number):
+                    if is_registry_registered(license_number):
                         print('Existing car!')
                     else:
                         print('Car not existing in database')
@@ -101,7 +99,8 @@ def process_frames():
 
                 # Dibujar el cuadro delimitador y el texto sobre el fotograma
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (0, 255, 0), 2)
-                cv2.putText(frame, license_number, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,(36, 255, 12), 2)
+                cv2.putText(frame, license_number, (bbox[0], bbox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
+                            (36, 255, 12), 2)
 
         rendered_frame = cv2.cvtColor(np.array(frame), cv2.COLOR_RGB2BGR)
         cv2.imshow('YOLOv5 Object Detection', rendered_frame)
@@ -129,7 +128,8 @@ def read_qr_code(frame, last_data):
             cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
         else:
             rect = qr.rect
-            cv2.rectangle(frame, (rect.left, rect.top), (rect.left + rect.width, rect.top + rect.height), (0, 255, 0), 2)
+            cv2.rectangle(frame, (rect.left, rect.top), (rect.left + rect.width, rect.top + rect.height), (0, 255, 0),
+                          2)
 
         # Display the QR code data
         x, y, w, h = qr.rect
@@ -158,20 +158,18 @@ def process_qr_frames():
 
 
 def run():
-# Iniciar el procesamiento de fotogramas en hilos separados
+    # Iniciar el procesamiento de fotogramas en hilos separados
     frame_thread = threading.Thread(target=process_frames)
     qr_thread = threading.Thread(target=process_qr_frames)
 
     frame_thread.start()
     qr_thread.start()
 
-# Esperar a que los hilos de procesamiento terminen
+    # Esperar a que los hilos de procesamiento terminen
     frame_thread.join()
     qr_thread.join()
 
-# Liberar recursos de las cámaras al terminar
+    # Liberar recursos de las cámaras al terminar
     cap.release()
     cap_qr.release()
     cv2.destroyAllWindows()
-
-run()

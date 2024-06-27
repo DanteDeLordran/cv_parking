@@ -1,25 +1,23 @@
-import datetime
-
-from sqlmodel import Field, SQLModel
+from datetime import datetime
 
 
-class Dependency(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Dependency:
+    id: int
     name: str
 
 
-class Employee(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Employee:
+    id: int
     employee_number: str
     name: str
     lastname: str
-    dependency_id: int = Field(foreign_key="dependency.id")
+    dependency_id: int
     car_registry: str
 
 
-class History(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    employee_id: int = Field(foreign_key="employee.id")
-    dependency_id: int = Field(foreign_key="dependency.id")
-    entry_time = Field(default=datetime.datetime.now())
-    exit_time = Field(default=datetime.datetime.now())
+class History:
+    id: int
+    employee_id: int
+    dependency_id: int
+    entry_time: datetime
+    exit_time: datetime

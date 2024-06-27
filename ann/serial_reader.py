@@ -1,14 +1,14 @@
-import sys
-import os
-import torch
-import cv2
-import numpy as np
-from PIL import Image
-import pathlib
-import easyocr
-import time
-import threading
 import datetime as dt
+import os
+import pathlib
+import sys
+import threading
+import time
+import cv2
+import easyocr
+import numpy as np
+import torch
+from PIL import Image
 from colorama import Fore
 from pyzbar.pyzbar import decode
 from ..app.main import get_all_employees_car_registry, get_employee_by_car_registry
@@ -157,18 +157,21 @@ def process_qr_frames():
             break
 
 
+def run():
 # Iniciar el procesamiento de fotogramas en hilos separados
-frame_thread = threading.Thread(target=process_frames)
-qr_thread = threading.Thread(target=process_qr_frames)
+    frame_thread = threading.Thread(target=process_frames)
+    qr_thread = threading.Thread(target=process_qr_frames)
 
-frame_thread.start()
-qr_thread.start()
+    frame_thread.start()
+    qr_thread.start()
 
 # Esperar a que los hilos de procesamiento terminen
-frame_thread.join()
-qr_thread.join()
+    frame_thread.join()
+    qr_thread.join()
 
 # Liberar recursos de las cámaras al terminar
-cap.release()
-cap_qr.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cap_qr.release()
+    cv2.destroyAllWindows()
+
+run()

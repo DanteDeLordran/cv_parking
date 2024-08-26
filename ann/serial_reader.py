@@ -17,7 +17,7 @@ temp = pathlib.PosixPath
 pathlib.PosixPath = pathlib.WindowsPath
 sys.path.append(os.path.abspath('yolov5'))
 
-modelo_placas = r'./cv_parking/ann/modelo_placas.pt'
+modelo_placas = r'ann/modelo_placas.pt'
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=modelo_placas, force_reload=False)
 pathlib.PosixPath = temp
 
@@ -25,7 +25,7 @@ reader = easyocr.Reader(['es'], gpu=False)
 
 raspberry_name = "TEST"
 camera_qr = 0
-camera_placas = 'VideoPruebaPaaraCV2.mp4'
+camera_placas = 9999999999999
 
 last_detected_qr = {'code': None, 'timestamp': None}
 last_detected_plate = {'license_number': None, 'timestamp': None}

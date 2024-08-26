@@ -25,7 +25,7 @@ reader = easyocr.Reader(['es'], gpu=False)
 
 raspberry_name = "TEST"
 camera_qr = 0
-camera_placas = 9999999999999
+camera_placas = 'VideoPruebaPaaraCV2.mp4'
 
 last_detected_qr = {'code': None, 'timestamp': None}
 last_detected_plate = {'license_number': None, 'timestamp': None}
